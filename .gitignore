@@ -1,0 +1,16 @@
+# Archivos de sistema y configuración de usuario
+.idea/
+.gradle/
+local.properties
+.DS_Store
+Thumbs.db
+
+# Carpetas de compilación (las pesadas)
+build/
+app/build/
+**/build/
+
+# Archivos temporales
+*.iml
+*.log
+captures/
