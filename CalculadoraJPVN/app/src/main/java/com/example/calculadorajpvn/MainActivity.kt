@@ -1,48 +1,40 @@
 package com.example.calculadorajpvn
 
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import kotlin.math.abs
+import kotlin.math.floor
 
 class MainActivity : AppCompatActivity() {
 
-    // --- ZONA DE VARIABLES (MEMORIA) ---
-    // Las declaro aquí arriba para que TODAS las funciones puedan verlas y usarlas.
-
-    // 1. La Pantalla: 'lateinit' significa "Te prometo que la inicializo más tarde en el onCreate".
     private lateinit var tvResultado: TextView
+    private lateinit var tvOperacion: TextView
 
-    // 2. Memoria de números:
-    private var primerNumero: Double = 0.0  // Aquí guardo el 1er número (ej: el 5 en "5 + 3")
-    private var operacion: String = ""      // Aquí guardo qué botón apreté ("+", "-", etc)
-
-    // 3. Bandera de control:
-    // Sirve para saber si debo borrar la pantalla al escribir un nuevo número.
-    // True = "La pantalla muestra un resultado viejo, bórralo si escribo algo".
+    private var primerNumero: Double = 0.0
+    private var operacion: String = ""
     private var nuevaOperacion: Boolean = true
 
-    // --- ZONA DE INICIO (DONDE ARRANCA LA APP) ---
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Hace que el layout respete los bordes del sistema (status bar, nav bar)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+
         setContentView(R.layout.activity_main)
 
-        // PASO 1: Conectar el cableado
-        // Busco la pantalla en el diseño (XML) y la guardo en mi variable.
         tvResultado = findViewById(R.id.tvResultado)
+        tvOperacion = findViewById(R.id.tvOperacion)
 
-        // PASO 2: Configurar los botones
-        // Llamo a esta función que creé abajo para no llenar de código el onCreate.
         inicializarBotones()
     }
 
-    // --- ZONA DE FUNCIONES (MIS HERRAMIENTAS) ---
-
-    // Función para conectar y dar vida a todos los botones
     private fun inicializarBotones() {
 
-        // GRUPO A: Los Números
-        // Configuro qué pasa cuando tocas el 0, 1, 2...
+        // Numeros
         findViewById<Button>(R.id.btn0).setOnClickListener { escribirNumero("0") }
         findViewById<Button>(R.id.btn1).setOnClickListener { escribirNumero("1") }
         findViewById<Button>(R.id.btn2).setOnClickListener { escribirNumero("2") }
@@ -55,94 +47,124 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn9).setOnClickListener { escribirNumero("9") }
         findViewById<Button>(R.id.btnPunto).setOnClickListener { escribirNumero(".") }
 
-        // GRUPO B: Las Operaciones
-        // Cuando tocas +, -, * o /, guardo la operación en memoria
+        // Operaciones
         findViewById<Button>(R.id.btnMas).setOnClickListener { guardarOperacion("+") }
         findViewById<Button>(R.id.btnMenos).setOnClickListener { guardarOperacion("-") }
         findViewById<Button>(R.id.btnMul).setOnClickListener { guardarOperacion("*") }
         findViewById<Button>(R.id.btnDiv).setOnClickListener { guardarOperacion("/") }
 
-        // GRUPO C: Acciones Especiales
+        // Igual
+        findViewById<Button>(R.id.btnIgual).setOnClickListener { calcularResultado() }
 
-        // Botón IGUAL (=): Aquí ocurre la magia matemática
-        findViewById<Button>(R.id.btnIgual).setOnClickListener {
-            calcularResultado()
-        }
-
-        // Botón C (Clear): Reinicia todo a cero
+        // C - Limpiar todo
         findViewById<Button>(R.id.btnC).setOnClickListener {
             tvResultado.text = "0"
+            tvOperacion.text = ""
             primerNumero = 0.0
             operacion = ""
             nuevaOperacion = true
         }
 
-        // Botón BORRAR (DEL): Borra solo el último numerito
+        // DEL - Borrar ultimo digito
         findViewById<Button>(R.id.btnBorrar).setOnClickListener {
             val textoActual = tvResultado.text.toString()
             if (textoActual.length > 1) {
-                // Si hay varios números, quito el último
                 tvResultado.text = textoActual.dropLast(1)
             } else {
-                // Si solo queda un número, pongo cero (no dejo la pantalla vacía)
                 tvResultado.text = "0"
                 nuevaOperacion = true
             }
         }
+
+        // +/- Cambiar signo
+        findViewById<Button>(R.id.btnPlusMinus).setOnClickListener {
+            val actual = tvResultado.text.toString().toDoubleOrNull() ?: return@setOnClickListener
+            tvResultado.text = formatearNumero(actual * -1)
+        }
+
+        // % Porcentaje
+        findViewById<Button>(R.id.btnPorcentaje).setOnClickListener {
+            val actual = tvResultado.text.toString().toDoubleOrNull() ?: return@setOnClickListener
+            tvResultado.text = formatearNumero(actual / 100)
+        }
     }
 
-    // LÓGICA 1: Escribir en pantalla
-    private fun escribirNumero(numero: String) {
-        // Si acabo de hacer una suma (nuevaOperacion = true), borro el resultado anterior.
+    private fun escribirNumero(num: String) {
         if (nuevaOperacion) {
             tvResultado.text = ""
             nuevaOperacion = false
         }
 
-        // Validación anti-error: Si ya hay un punto, no dejo poner otro.
-        if (numero == "." && tvResultado.text.contains(".")) {
-            return // "Return" significa: detente aquí, no hagas nada más.
+        if (num == "." && tvResultado.text.contains(".")) return
+        if (num == "0" && tvResultado.text.toString() == "0") return
+
+        if (tvResultado.text.toString() == "0" && num != ".") {
+            tvResultado.text = num
+        } else {
+            tvResultado.append(num)
         }
 
-        // "Append" significa pegar al final (ej: tengo "1", pego "2" -> "12")
-        tvResultado.append(numero)
+        ajustarTamanoTexto(tvResultado.text.length)
     }
 
-    // LÓGICA 2: Preparar la operación
+    private fun ajustarTamanoTexto(longitud: Int) {
+        tvResultado.textSize = when {
+            longitud <= 6  -> 60f
+            longitud <= 9  -> 44f
+            longitud <= 12 -> 32f
+            else           -> 24f
+        }
+    }
+
     private fun guardarOperacion(op: String) {
-        // Guardo el número que está en pantalla en la variable 'primerNumero'
-        primerNumero = tvResultado.text.toString().toDouble()
-        // Guardo qué operación quiere hacer el usuario (+, -, *, /)
+        primerNumero = tvResultado.text.toString().toDoubleOrNull() ?: 0.0
         operacion = op
-        // Aviso que lo siguiente que escriban será un número nuevo
+        nuevaOperacion = true
+
+        val simbolo = when (op) {
+            "+" -> "+"
+            "-" -> "-"
+            "*" -> "x"
+            "/" -> "/"
+            else -> op
+        }
+        tvOperacion.text = formatearNumero(primerNumero) + " " + simbolo
+    }
+
+    private fun calcularResultado() {
+        val segundoNumero = tvResultado.text.toString().toDoubleOrNull() ?: return
+
+        val resultado: Double = when (operacion) {
+            "+" -> primerNumero + segundoNumero
+            "-" -> primerNumero - segundoNumero
+            "*" -> primerNumero * segundoNumero
+            "/" -> {
+                if (segundoNumero != 0.0) {
+                    primerNumero / segundoNumero
+                } else {
+                    tvResultado.text = "Error"
+                    tvOperacion.text = ""
+                    nuevaOperacion = true
+                    return
+                }
+            }
+            else -> return
+        }
+
+        val simbolo = when (operacion) {
+            "+" -> "+"; "-" -> "-"; "*" -> "x"; "/" -> "/"; else -> operacion
+        }
+        tvOperacion.text = formatearNumero(primerNumero) + " " + simbolo + " " + formatearNumero(segundoNumero) + " ="
+        tvResultado.text = formatearNumero(resultado)
+        ajustarTamanoTexto(tvResultado.text.length)
         nuevaOperacion = true
     }
 
-    // LÓGICA 3: Calcular
-    private fun calcularResultado() {
-        // Tomo el número que está AHORA en pantalla (el segundo número)
-        val segundoNumero = tvResultado.text.toString().toDouble()
-        var resultado = 0.0
-
-        // Reviso qué operación tenía guardada y calculo
-        if (operacion == "+") {
-            resultado = primerNumero + segundoNumero
-        } else if (operacion == "-") {
-            resultado = primerNumero - segundoNumero
-        } else if (operacion == "*") {
-            resultado = primerNumero * segundoNumero
-        } else if (operacion == "/") {
-            // Validación simple: no se puede dividir entre 0
-            if (segundoNumero != 0.0) {
-                resultado = primerNumero / segundoNumero
-            } else {
-                resultado = 0.0 // O podrías poner un mensaje de error
-            }
+    private fun formatearNumero(numero: Double): String {
+        return if (numero == floor(numero) && !numero.isInfinite() && abs(numero) < 1_000_000_000) {
+            numero.toLong().toString()
+        } else {
+            numero.toBigDecimal().stripTrailingZeros().toPlainString()
         }
-
-        // Muestro el resultado final
-        tvResultado.text = resultado.toString()
-        // Preparo todo para empezar de nuevo si el usuario escribe otro número
-        nuevaOperacion = true
     }
 }
