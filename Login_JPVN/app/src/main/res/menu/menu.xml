@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Item para cerrar sesión.
+        El id "salir" se usará en Kotlin para detectar
+        cuando el usuario presiona esta opción.
+    -->
+    <item
+        android:id="@+id/salir"
+        android:title="Salir" />
+
+    <!--
+        Item de perfil/información del usuario.
+        El id "perfil" se usará en Kotlin.
+    -->
+    <item
+        android:id="@+id/perfil"
+        android:title="Mi perfil" />
+
+</menu>

@@ -10,37 +10,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Login_JPVN">
-
-        <activity
-            android:name=".Agrega"
-            android:launchMode="singleInstance"
-            android:exported="false" />
-
-        <activity
-            android:name=".Detalle"
-            android:launchMode="singleInstance"
-            android:exported="false" />
-
-        <activity
-            android:name=".ListaPrincipal"
-            android:launchMode="singleInstance"
-            android:exported="false" />
-
-        <activity
-            android:name=".home"
-            android:exported="false" />
-
+        android:theme="@style/Theme.Buscaminas_JPVN">
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Buscaminas_JPVN">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>
