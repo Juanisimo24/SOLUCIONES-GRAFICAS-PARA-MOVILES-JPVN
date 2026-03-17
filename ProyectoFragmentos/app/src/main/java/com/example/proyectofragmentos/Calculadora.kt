@@ -1,13 +1,16 @@
-package com.example.calculadorajpvn
+package com.example.proyectofragmentos
+
 import android.os.Bundle
-import android.view.WindowManager
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
 import kotlin.math.abs
 import kotlin.math.floor
-class MainActivity : AppCompatActivity() {
+
+class Calculadora : Fragment() {
 
     private lateinit var tvResultado: TextView
     private lateinit var tvOperacion: TextView
@@ -16,46 +19,46 @@ class MainActivity : AppCompatActivity() {
     private var operacion: String = ""
     private var nuevaOperacion: Boolean = true
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val view = inflater.inflate(R.layout.fragment_calculadora, container, false)
 
-        // Hace que el layout respete los bordes del sistema (status bar, nav bar)
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        tvResultado = view.findViewById(R.id.tvResultado)
+        tvOperacion = view.findViewById(R.id.tvOperacion)
 
-        setContentView(R.layout.activity_main)
+        inicializarBotones(view)
 
-        tvResultado = findViewById(R.id.tvResultado)
-        tvOperacion = findViewById(R.id.tvOperacion)
-
-        inicializarBotones()
+        return view
     }
 
-    private fun inicializarBotones() {
+    private fun inicializarBotones(view: View) {
 
         // Numeros
-        findViewById<Button>(R.id.btn0).setOnClickListener { escribirNumero("0") }
-        findViewById<Button>(R.id.btn1).setOnClickListener { escribirNumero("1") }
-        findViewById<Button>(R.id.btn2).setOnClickListener { escribirNumero("2") }
-        findViewById<Button>(R.id.btn3).setOnClickListener { escribirNumero("3") }
-        findViewById<Button>(R.id.btn4).setOnClickListener { escribirNumero("4") }
-        findViewById<Button>(R.id.btn5).setOnClickListener { escribirNumero("5") }
-        findViewById<Button>(R.id.btn6).setOnClickListener { escribirNumero("6") }
-        findViewById<Button>(R.id.btn7).setOnClickListener { escribirNumero("7") }
-        findViewById<Button>(R.id.btn8).setOnClickListener { escribirNumero("8") }
-        findViewById<Button>(R.id.btn9).setOnClickListener { escribirNumero("9") }
-        findViewById<Button>(R.id.btnPunto).setOnClickListener { escribirNumero(".") }
+        view.findViewById<Button>(R.id.btn0).setOnClickListener { escribirNumero("0") }
+        view.findViewById<Button>(R.id.btn1).setOnClickListener { escribirNumero("1") }
+        view.findViewById<Button>(R.id.btn2).setOnClickListener { escribirNumero("2") }
+        view.findViewById<Button>(R.id.btn3).setOnClickListener { escribirNumero("3") }
+        view.findViewById<Button>(R.id.btn4).setOnClickListener { escribirNumero("4") }
+        view.findViewById<Button>(R.id.btn5).setOnClickListener { escribirNumero("5") }
+        view.findViewById<Button>(R.id.btn6).setOnClickListener { escribirNumero("6") }
+        view.findViewById<Button>(R.id.btn7).setOnClickListener { escribirNumero("7") }
+        view.findViewById<Button>(R.id.btn8).setOnClickListener { escribirNumero("8") }
+        view.findViewById<Button>(R.id.btn9).setOnClickListener { escribirNumero("9") }
+        view.findViewById<Button>(R.id.btnPunto).setOnClickListener { escribirNumero(".") }
 
         // Operaciones
-        findViewById<Button>(R.id.btnMas).setOnClickListener { guardarOperacion("+") }
-        findViewById<Button>(R.id.btnMenos).setOnClickListener { guardarOperacion("-") }
-        findViewById<Button>(R.id.btnMul).setOnClickListener { guardarOperacion("*") }
-        findViewById<Button>(R.id.btnDiv).setOnClickListener { guardarOperacion("/") }
+        view.findViewById<Button>(R.id.btnMas).setOnClickListener { guardarOperacion("+") }
+        view.findViewById<Button>(R.id.btnMenos).setOnClickListener { guardarOperacion("-") }
+        view.findViewById<Button>(R.id.btnMul).setOnClickListener { guardarOperacion("*") }
+        view.findViewById<Button>(R.id.btnDiv).setOnClickListener { guardarOperacion("/") }
 
         // Igual
-        findViewById<Button>(R.id.btnIgual).setOnClickListener { calcularResultado() }
+        view.findViewById<Button>(R.id.btnIgual).setOnClickListener { calcularResultado() }
 
         // C - Limpiar todo
-        findViewById<Button>(R.id.btnC).setOnClickListener {
+        view.findViewById<Button>(R.id.btnC).setOnClickListener {
             tvResultado.text = "0"
             tvOperacion.text = ""
             primerNumero = 0.0
@@ -64,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // DEL - Borrar ultimo digito
-        findViewById<Button>(R.id.btnBorrar).setOnClickListener {
+        view.findViewById<Button>(R.id.btnBorrar).setOnClickListener {
             val textoActual = tvResultado.text.toString()
             if (textoActual.length > 1) {
                 tvResultado.text = textoActual.dropLast(1)
@@ -75,13 +78,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         // +/- Cambiar signo
-        findViewById<Button>(R.id.btnPlusMinus).setOnClickListener {
+        view.findViewById<Button>(R.id.btnPlusMinus).setOnClickListener {
             val actual = tvResultado.text.toString().toDoubleOrNull() ?: return@setOnClickListener
             tvResultado.text = formatearNumero(actual * -1)
         }
 
         // % Porcentaje
-        findViewById<Button>(R.id.btnPorcentaje).setOnClickListener {
+        view.findViewById<Button>(R.id.btnPorcentaje).setOnClickListener {
             val actual = tvResultado.text.toString().toDoubleOrNull() ?: return@setOnClickListener
             tvResultado.text = formatearNumero(actual / 100)
         }
@@ -120,11 +123,7 @@ class MainActivity : AppCompatActivity() {
         nuevaOperacion = true
 
         val simbolo = when (op) {
-            "+" -> "+"
-            "-" -> "-"
-            "*" -> "x"
-            "/" -> "/"
-            else -> op
+            "+" -> "+"; "-" -> "-"; "*" -> "x"; "/" -> "/"; else -> op
         }
         tvOperacion.text = formatearNumero(primerNumero) + " " + simbolo
     }
@@ -137,9 +136,8 @@ class MainActivity : AppCompatActivity() {
             "-" -> primerNumero - segundoNumero
             "*" -> primerNumero * segundoNumero
             "/" -> {
-                if (segundoNumero != 0.0) {
-                    primerNumero / segundoNumero
-                } else {
+                if (segundoNumero != 0.0) primerNumero / segundoNumero
+                else {
                     tvResultado.text = "Error"
                     tvOperacion.text = ""
                     nuevaOperacion = true
@@ -152,7 +150,7 @@ class MainActivity : AppCompatActivity() {
         val simbolo = when (operacion) {
             "+" -> "+"; "-" -> "-"; "*" -> "x"; "/" -> "/"; else -> operacion
         }
-        tvOperacion.text = formatearNumero(primerNumero) + " " + simbolo + " " + formatearNumero(segundoNumero) + " ="
+        tvOperacion.text = "${formatearNumero(primerNumero)} $simbolo ${formatearNumero(segundoNumero)} ="
         tvResultado.text = formatearNumero(resultado)
         ajustarTamanoTexto(tvResultado.text.length)
         nuevaOperacion = true
